@@ -5,11 +5,13 @@
 #include <QLabel>
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QLineEdit>    
+#include <QComboBox>    
 
 class SchedulerGUI : public QWidget {
     Q_OBJECT
 public:
-    SchedulerGUI(QWidget* parent = nullptr);
+    explicit SchedulerGUI(QWidget* parent = nullptr);
 
 private slots:
     void startScheduler();
@@ -17,10 +19,22 @@ private slots:
     void addProcess();
 
 private:
-    QTableWidget* table;
+    
+    QLineEdit* arrivalInput;
+    QLineEdit* burstInput;
+    QLineEdit* priorityInput;
+    QComboBox* algoSelect;
+
+
     QLabel* avgWaitingTimeLabel;
     QLabel* avgTurnaroundTimeLabel;
+
+
+    QTableWidget* table;
     QGraphicsView* ganttView;
     QGraphicsScene* scene;
+
+    
     QTimer* timer;
+    int currentStepIndex; 
 };
