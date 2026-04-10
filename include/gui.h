@@ -36,5 +36,10 @@ private:
 
     
     QTimer* timer;
-    int currentStepIndex; 
+    int currentTime;
+    int lastExecutedPid;
+    int stepStartTime;
+    bool isRunning;
+
+    void simulateStep();
 };
