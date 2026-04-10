@@ -20,21 +20,35 @@ private slots:
 
 private:
     
+    // 🔹 Inputs
     QLineEdit* arrivalInput;
     QLineEdit* burstInput;
     QLineEdit* priorityInput;
+
     QComboBox* algoSelect;
+    QComboBox* modeSelect;  //(Live )
 
 
+    // 🔹 Outputs
     QLabel* avgWaitingTimeLabel;
     QLabel* avgTurnaroundTimeLabel;
-
 
     QTableWidget* table;
     QGraphicsView* ganttView;
     QGraphicsScene* scene;
 
     
+    // 🔹 Timer
     QTimer* timer;
     int currentStepIndex; 
+
+
+    // 🔥 Live Simulation Variables 
+    int currentTime;
+    int lastExecutedPid;
+    int stepStartTime;
+    bool isRunning;
+
+    // 🔥 Core function
+    void simulateStep();
 };
