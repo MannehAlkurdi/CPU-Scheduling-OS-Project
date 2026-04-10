@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include <QLineEdit>    
 #include <QComboBox>    
+#include <queue>   // 🔥 Round Robin
 
 class SchedulerGUI : public QWidget {
     Q_OBJECT
@@ -26,7 +27,7 @@ private:
     QLineEdit* priorityInput;
 
     QComboBox* algoSelect;
-    QComboBox* modeSelect;  //(Live )
+    QComboBox* modeSelect;   // 🔥 Live / Offline
 
 
     // 🔹 Outputs
@@ -48,6 +49,14 @@ private:
     int lastExecutedPid;
     int stepStartTime;
     bool isRunning;
+
+    // 🔥 Non-Preemptive fix (SJF + Priority)
+    int currentProcessIndex = -1;
+
+    // 🔥 Round Robin
+    std::queue<int> readyQueue;
+    int quantum = 2;
+
 
     // 🔥 Core function
     void simulateStep();
