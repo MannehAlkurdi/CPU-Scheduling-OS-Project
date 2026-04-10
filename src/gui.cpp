@@ -42,7 +42,7 @@ SchedulerGUI::SchedulerGUI(QWidget* parent)
     inputLayout->addWidget(priorityInput);
 
     algoSelect = new QComboBox(this);
-    algoSelect->addItems({"FCFS", "SJF (Non-Preemptive)", "SRTF (Preemptive)", "Priority", "Round Robin"});
+    algoSelect->addItems({"FCFS", "SJF (Non-Preemptive)", "SRTF (Preemptive)", "Priority","Priority (Preemptive)" , "Round Robin"});
 
     // 🔥 Mode
     modeSelect = new QComboBox(this);
@@ -109,7 +109,7 @@ void SchedulerGUI::startScheduler() {
     QString mode = modeSelect->currentText();
     QString selected = algoSelect->currentText();
 
-    // 🟢 OFFLINE
+    //  OFFLINE
     if (mode == "Offline") {
 
         if (selected == "FCFS") FCFS();
@@ -121,7 +121,7 @@ void SchedulerGUI::startScheduler() {
         timer->start(300);
     }
 
-    // 🔥 LIVE
+    // LIVE
     else {
 
         for (auto &p : processes) {
@@ -142,7 +142,7 @@ void SchedulerGUI::updateSimulation() {
 
     QString mode = modeSelect->currentText();
 
-    // 🟢 OFFLINE
+    //  OFFLINE
     if (mode == "Offline") {
 
         if (currentStepIndex >= ganttLog.size()) {
@@ -166,14 +166,17 @@ void SchedulerGUI::updateSimulation() {
         int x = step.startTime * scale;
         int width = (step.endTime - step.startTime) * scale;
 
-        scene->addRect(x, 0, width, height, QPen(Qt::black), QBrush(Qt::Cyan));
+        // 
+        QColor color = QColor::fromHsv((step.pid * 50) % 360, 255, 200);
+
+        scene->addRect(x, 0, width, height, QPen(Qt::black), QBrush(color));
         QGraphicsTextItem* text = scene->addText(QString("P%1").arg(step.pid));
         text->setPos(x + (width / 2) - 10, height / 3);
 
         currentStepIndex++;
     }
 
-    // 🔥 LIVE
+    //  LIVE
     else {
 
         if (!isRunning) return;
@@ -192,7 +195,9 @@ void SchedulerGUI::updateSimulation() {
             int x = step.startTime * scale;
             int width = (step.endTime - step.startTime) * scale;
 
-            scene->addRect(x, 0, width, 60);
+            QColor color = QColor::fromHsv((step.pid * 50) % 360, 255, 200);
+
+            scene->addRect(x, 0, width, 60, QPen(Qt::black), QBrush(color));
             QGraphicsTextItem* t = scene->addText(QString("P%1").arg(step.pid));
             t->setPos(x + width / 2, 20);
         }
@@ -227,15 +232,16 @@ void SchedulerGUI::updateSimulation() {
     }
 }
 
+#include <climits>
+
 void SchedulerGUI::simulateStep() {
 
     QString selected = algoSelect->currentText();
 
     int idx = -1;
 
-    // FCFS
+    //  FCFS
     if (selected == "FCFS") {
-
         for (int i = 0; i < processes.size(); i++) {
             if (processes[i].arrivalTime <= currentTime &&
                 processes[i].remainingTime > 0) {
@@ -245,7 +251,7 @@ void SchedulerGUI::simulateStep() {
         }
     }
 
-    //  SRTF (Preemptive)
+    //  SRTF
     else if (selected == "SRTF (Preemptive)") {
 
         int minRemaining = INT_MAX;
@@ -261,7 +267,23 @@ void SchedulerGUI::simulateStep() {
         }
     }
 
-    // NO READY PROCESS
+    //  Priority Preemptive
+    else if (selected == "Priority (Preemptive)") {
+
+        int bestPriority = INT_MAX;
+
+        for (int i = 0; i < processes.size(); i++) {
+            if (processes[i].arrivalTime <= currentTime &&
+                processes[i].remainingTime > 0 &&
+                processes[i].priority < bestPriority) {
+
+                bestPriority = processes[i].priority;
+                idx = i;
+            }
+        }
+    }
+
+    
     if (idx == -1) {
         currentTime++;
         return;
@@ -269,7 +291,7 @@ void SchedulerGUI::simulateStep() {
 
     Process &p = processes[idx];
 
-    // 🔥 Handle switching (preemption)
+    //  switching
     if (p.pid != lastExecutedPid) {
         if (lastExecutedPid != -1) {
             ganttLog.push_back({lastExecutedPid, stepStartTime, currentTime});
@@ -281,7 +303,6 @@ void SchedulerGUI::simulateStep() {
     p.remainingTime--;
     currentTime++;
 
-  
     if (p.remainingTime == 0) {
         p.completionTime = currentTime;
     }
