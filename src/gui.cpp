@@ -10,6 +10,7 @@
 #include <QHeaderView>
 #include <QLineEdit>
 #include <QLabel>
+#include <climits>
 
 std::vector<GanttStep> ganttLog;
 
@@ -228,16 +229,39 @@ void SchedulerGUI::updateSimulation() {
 
 void SchedulerGUI::simulateStep() {
 
+    QString selected = algoSelect->currentText();
+
     int idx = -1;
 
-    for (int i = 0; i < processes.size(); i++) {
-        if (processes[i].arrivalTime <= currentTime &&
-            processes[i].remainingTime > 0) {
-            idx = i;
-            break;
+    // FCFS
+    if (selected == "FCFS") {
+
+        for (int i = 0; i < processes.size(); i++) {
+            if (processes[i].arrivalTime <= currentTime &&
+                processes[i].remainingTime > 0) {
+                idx = i;
+                break;
+            }
         }
     }
 
+    //  SRTF (Preemptive)
+    else if (selected == "SRTF (Preemptive)") {
+
+        int minRemaining = INT_MAX;
+
+        for (int i = 0; i < processes.size(); i++) {
+            if (processes[i].arrivalTime <= currentTime &&
+                processes[i].remainingTime > 0 &&
+                processes[i].remainingTime < minRemaining) {
+
+                minRemaining = processes[i].remainingTime;
+                idx = i;
+            }
+        }
+    }
+
+    // NO READY PROCESS
     if (idx == -1) {
         currentTime++;
         return;
@@ -245,6 +269,7 @@ void SchedulerGUI::simulateStep() {
 
     Process &p = processes[idx];
 
+    // 🔥 Handle switching (preemption)
     if (p.pid != lastExecutedPid) {
         if (lastExecutedPid != -1) {
             ganttLog.push_back({lastExecutedPid, stepStartTime, currentTime});
@@ -256,6 +281,7 @@ void SchedulerGUI::simulateStep() {
     p.remainingTime--;
     currentTime++;
 
+  
     if (p.remainingTime == 0) {
         p.completionTime = currentTime;
     }
