@@ -20,15 +20,15 @@ private slots:
     void updateSimulation();
     void addProcess();
 
-    // 🔥 NEW
+   
     void generateProcesses();
 
 private:
     
     // 🔹 Inputs
-    QLineEdit* numProcessesInput;   // 🔥 NEW
+    QLineEdit* numProcessesInput;   
 
-    // ❌ (اختياري تحذفهم)
+  
     QLineEdit* arrivalInput;
     QLineEdit* burstInput;
     QLineEdit* priorityInput;
@@ -46,25 +46,25 @@ private:
     QGraphicsScene* scene;
 
     
-    // 🔹 Timer
+    //  Timer
     QTimer* timer;
     int currentStepIndex; 
 
 
-    // 🔥 Live Simulation Variables 
+    //  Live Simulation Variables 
     int currentTime;
     int lastExecutedPid;
     int stepStartTime;
     bool isRunning;
 
-    // 🔥 Non-Preemptive (SJF + Priority)
+    //  Non-Preemptive (SJF + Priority)
     int currentProcessIndex = -1;
 
-    // 🔥 Round Robin
+    //  Round Robin
     std::queue<int> readyQueue;
     int quantum = 2;
 
 
-    // 🔥 Core function
+    //  Core function
     void simulateStep();
 };
