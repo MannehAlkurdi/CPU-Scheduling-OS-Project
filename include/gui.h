@@ -7,10 +7,11 @@
 #include <QGraphicsScene>
 #include <QLineEdit>    
 #include <QComboBox>    
-#include <queue>   // 🔥 Round Robin
+#include <queue>
 
 class SchedulerGUI : public QWidget {
     Q_OBJECT
+
 public:
     explicit SchedulerGUI(QWidget* parent = nullptr);
 
@@ -19,15 +20,21 @@ private slots:
     void updateSimulation();
     void addProcess();
 
+    // 🔥 NEW
+    void generateProcesses();
+
 private:
     
     // 🔹 Inputs
+    QLineEdit* numProcessesInput;   // 🔥 NEW
+
+    // ❌ (اختياري تحذفهم)
     QLineEdit* arrivalInput;
     QLineEdit* burstInput;
     QLineEdit* priorityInput;
 
     QComboBox* algoSelect;
-    QComboBox* modeSelect;   // 🔥 Live / Offline
+    QComboBox* modeSelect;   // Live / Static
 
 
     // 🔹 Outputs
@@ -50,7 +57,7 @@ private:
     int stepStartTime;
     bool isRunning;
 
-    // 🔥 Non-Preemptive fix (SJF + Priority)
+    // 🔥 Non-Preemptive (SJF + Priority)
     int currentProcessIndex = -1;
 
     // 🔥 Round Robin
