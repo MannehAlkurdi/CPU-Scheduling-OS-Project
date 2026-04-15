@@ -236,12 +236,11 @@ void SchedulerGUI::updateSimulation() {
 
 void SchedulerGUI::simulateStep() {
 
-    QString selected = algoSelect->currentText();
-
+    QString algo = algoSelect->currentText();
     int idx = -1;
 
-    //  FCFS
-    if (selected == "FCFS") {
+    // ================= FCFS =================
+    if (algo == "FCFS") {
         for (int i = 0; i < processes.size(); i++) {
             if (processes[i].arrivalTime <= currentTime &&
                 processes[i].remainingTime > 0) {
@@ -251,8 +250,8 @@ void SchedulerGUI::simulateStep() {
         }
     }
 
-    //  SRTF
-    else if (selected == "SRTF (Preemptive)") {
+    // ================= SRTF =================
+    else if (algo == "SRTF (Preemptive)") {
 
         int minRemaining = INT_MAX;
 
@@ -267,8 +266,56 @@ void SchedulerGUI::simulateStep() {
         }
     }
 
-    //  Priority Preemptive
-    else if (selected == "Priority (Preemptive)") {
+    // ================= SJF NON PREEMPTIVE =================
+    else if (algo == "SJF (Non-Preemptive)") {
+
+        if (currentProcessIndex == -1) {
+            int minBurst = INT_MAX;
+
+            for (int i = 0; i < processes.size(); i++) {
+                if (processes[i].arrivalTime <= currentTime &&
+                    processes[i].remainingTime > 0 &&
+                    processes[i].burstTime < minBurst) {
+
+                    minBurst = processes[i].burstTime;
+                    currentProcessIndex = i;
+                }
+            }
+        }
+
+        idx = currentProcessIndex;
+
+        if (idx != -1 && processes[idx].remainingTime == 0) {
+            currentProcessIndex = -1;
+        }
+    }
+
+    // ================= PRIORITY NON PREEMPTIVE =================
+    else if (algo == "Priority") {
+
+        if (currentProcessIndex == -1) {
+            int bestPriority = INT_MAX;
+
+            for (int i = 0; i < processes.size(); i++) {
+                if (processes[i].arrivalTime <= currentTime &&
+                    processes[i].remainingTime > 0 &&
+                    processes[i].priority < bestPriority) {
+
+                    bestPriority = processes[i].priority;
+                    currentProcessIndex = i;
+                }
+            }
+        }
+
+        idx = currentProcessIndex;
+
+        if (idx != -1 && processes[idx].remainingTime == 0) {
+            currentProcessIndex = -1;
+        }
+    }
+
+    // ================= PRIORITY PREEMPTIVE =================
+    else if (algo == "Priority (Preemptive)") {
 
         int bestPriority = INT_MAX;
 
@@ -283,7 +330,45 @@ void SchedulerGUI::simulateStep() {
         }
     }
 
-    
+    // ================= ROUND ROBIN =================
+    else if (algo == "Round Robin") {
+
+        // add new arrivals
+        for (int i = 0; i < processes.size(); i++) {
+            if (processes[i].arrivalTime == currentTime) {
+                readyQueue.push(i);
+            }
+        }
+
+        if (!readyQueue.empty()) {
+
+            idx = readyQueue.front();
+            readyQueue.pop();
+
+            int exec = std::min(quantum, processes[idx].remainingTime);
+
+            if (processes[idx].pid != lastExecutedPid) {
+                if (lastExecutedPid != -1)
+                    ganttLog.push_back({lastExecutedPid, stepStartTime, currentTime});
+
+                lastExecutedPid = processes[idx].pid;
+                stepStartTime = currentTime;
+            }
+
+            processes[idx].remainingTime -= exec;
+            currentTime += exec;
+
+            if (processes[idx].remainingTime > 0) {
+                readyQueue.push(idx);
+            } else {
+                processes[idx].completionTime = currentTime;
+            }
+
+            return;
+        }
+    }
+
+    // ================= NO PROCESS =================
     if (idx == -1) {
         currentTime++;
         return;
@@ -291,11 +376,10 @@ void SchedulerGUI::simulateStep() {
 
     Process &p = processes[idx];
 
-    //  switching
     if (p.pid != lastExecutedPid) {
-        if (lastExecutedPid != -1) {
+        if (lastExecutedPid != -1)
             ganttLog.push_back({lastExecutedPid, stepStartTime, currentTime});
-        }
+
         lastExecutedPid = p.pid;
         stepStartTime = currentTime;
     }
