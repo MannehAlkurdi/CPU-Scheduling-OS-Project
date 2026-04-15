@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include <QLineEdit>    
 #include <QComboBox>    
+#include <QPushButton>   
 #include <queue>
 
 class SchedulerGUI : public QWidget {
@@ -20,15 +21,16 @@ private slots:
     void updateSimulation();
     void addProcess();
 
-   
     void generateProcesses();
+
+  
+    void addProcessLive();
 
 private:
     
     // 🔹 Inputs
     QLineEdit* numProcessesInput;   
 
-  
     QLineEdit* arrivalInput;
     QLineEdit* burstInput;
     QLineEdit* priorityInput;
@@ -46,23 +48,29 @@ private:
     QGraphicsScene* scene;
 
     
-    //  Timer
+    // 🔹 Timer
     QTimer* timer;
     int currentStepIndex; 
 
 
-    //  Live Simulation Variables 
+    
     int currentTime;
     int lastExecutedPid;
     int stepStartTime;
     bool isRunning;
 
-    //  Non-Preemptive (SJF + Priority)
+    // Non-Preemptive (SJF + Priority)
     int currentProcessIndex = -1;
 
     //  Round Robin
     std::queue<int> readyQueue;
     int quantum = 2;
+
+
+    //  Buttons (NEW)
+    QPushButton* pauseBtn;
+    QPushButton* resumeBtn;
+    QPushButton* addProcessLiveBtn;
 
 
     //  Core function
